@@ -751,6 +751,20 @@ export const Dex = new class implements ModdedDex {
 			spriteData.url += dir + '/' + name + '.png';
 		}
 
+		// Fakemon sprite override - use local sprites/fakemons/ folder
+		if (window.BattleFakemonSprites && BattleFakemonSprites.includes(speciesid)) {
+			let fakeDir;
+			if (options.shiny) {
+				fakeDir = isFront ? 'shiny' : 'shiny-back';
+			} else {
+				fakeDir = isFront ? 'front' : 'back';
+			}
+			spriteData.url = 'sprites/fakemons/' + fakeDir + '/' + speciesid + '.png';
+			spriteData.w = 96;
+			spriteData.h = 96;
+			spriteData.pixelated = false;
+		}
+
 		if (!options.noScale) {
 			if (graphicsGen > 4) {
 				// no scaling
@@ -828,6 +842,11 @@ export const Dex = new class implements ModdedDex {
 			// @ts-expect-error safe, but too lazy to cast
 			id = toID(pokemon.volatiles.formechange[1]);
 		}
+		if (window.BattleFakemonSprites && BattleFakemonSprites.includes(id)) {
+			const fainted = ((pokemon as Pokemon | ServerPokemon)?.fainted ?
+				`;opacity:.3;filter:grayscale(100%) brightness(.5)` : ``);
+			return `background:transparent url(sprites/fakemons/icon/${id}.png) no-repeat scroll 0px 0px${fainted}`;
+		}
 		let num = this.getPokemonIconNum(id, pokemon?.gender === 'F', facingLeft);
 
 		let top = Math.floor(num / 12) * 30;
@@ -851,6 +870,10 @@ export const Dex = new class implements ModdedDex {
 			}
 		}
 		if (species.exists === false) return { spriteDir: 'sprites/gen5', spriteid: '0', x: 10, y: 5 };
+		if (window.BattleFakemonSprites && BattleFakemonSprites.includes(id)) {
+			const dir = pokemon.shiny ? 'sprites/fakemons/shiny' : 'sprites/fakemons/front';
+			return { spriteDir: dir, spriteid: id, x: 10, y: 5 };
+		}
 		if (Dex.afdMode) {
 			return {
 				spriteid,
@@ -917,7 +940,10 @@ export const Dex = new class implements ModdedDex {
 		const data = this.getTeambuilderSpriteData(pokemon, dex);
 		const shiny = (data.shiny ? '-shiny' : '');
 		const resize = (data.h ? `background-size:${data.h}px` : '');
-		return `background-image:url(${Dex.resourcePrefix}${data.spriteDir}${shiny}/${data.spriteid}.png);background-position:${data.x + xOffset}px ${data.y + yOffset}px;background-repeat:no-repeat;${resize}`;
+		const url = (data.spriteDir.startsWith('sprites/fakemons')
+			? `${data.spriteDir}/${data.spriteid}.png`
+			: `${Dex.resourcePrefix}${data.spriteDir}${shiny}/${data.spriteid}.png`);
+		return `background-image:url(${url});background-position:${data.x + xOffset}px ${data.y + yOffset}px;background-repeat:no-repeat;${resize}`;
 	}
 
 	getItemIcon(item: any) {

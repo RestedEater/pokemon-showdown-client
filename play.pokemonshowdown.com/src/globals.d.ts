@@ -14,6 +14,7 @@ declare const BattleAliases: { [id: string]: string };
 declare const BattleStatuses: { [id: string]: AnyObject };
 declare const BattlePokemonSprites: { [id: string]: AnyObject };
 declare const BattlePokemonSpritesBW: { [id: string]: AnyObject };
+declare const BattleFakemonSprites: string[];
 declare const NonBattleGames: { [id: string]: string };
 
 // Window

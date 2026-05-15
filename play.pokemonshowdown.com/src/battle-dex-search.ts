@@ -702,6 +702,10 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			if (!format) format = 'ou' as ID;
 			this.isDoubles = format.includes('doubles');
 		}
+		if (format === 'newdawnofficialsinglesformat') {
+			this.formatType = 'natdex';
+			format = 'newdawn' as ID;
+		}
 		if (format.includes('doubles') && this.dex.gen > 4 && !this.formatType) {
 			this.formatType = 'doubles';
 			this.isDoubles = true;
@@ -762,6 +766,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			this.illegalReasons = {};
 
 			for (const id in this.getTable()) {
+				if (this.searchType === 'pokemon' && this.dex.species.get(id).battleOnly) continue;
 				if (!(id in legalityFilter)) {
 					this.baseIllegalResults.push([this.searchType, id as ID]);
 					this.illegalReasons[id] = 'Illegal';
@@ -1155,6 +1160,10 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 			tierSet = tierSet.slice(0, slices.AG || slices.Uber).concat(tierSet.slice(slices.OU));
 		} else if (format === 'caplc') {
 			tierSet = tierSet.slice(slices['CAP LC'], slices.AG || slices.Uber).concat(tierSet.slice(slices.LC));
+		} else if (format.includes('newdawnofficial')) {
+			tierSet = tierSet.slice(slices.FRBD);
+		} else if (format === 'newdawn') {
+			tierSet = tierSet.slice(slices.ND ?? slices.FRBD ?? slices.AG);
 		} else if (format === 'anythinggoes' || format.endsWith('ag') || format.startsWith('ag')) {
 			tierSet = tierSet.slice(slices.AG);
 		} else if (isHackmons && (dex.gen < 9 || this.formatType === 'natdex')) {
